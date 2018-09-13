@@ -362,6 +362,9 @@ def train_opts(parser):
                        Set to zero to turn off label smoothing.
                        For more detailed information, see:
                        https://arxiv.org/abs/1512.00567""")
+    group.add_argument('-batch_schedule', type=str,
+                       choices=["batch_5wide"],
+                       help="""Use non fixed batch schedule""")
     # learning rate
     group = parser.add_argument_group('Optimization- Rate')
     group.add_argument('-learning_rate', type=float, default=1.0,

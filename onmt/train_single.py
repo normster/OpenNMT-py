@@ -18,6 +18,7 @@ from onmt.utils.optimizers import build_optim
 from onmt.trainer import build_trainer
 from onmt.models import build_model_saver
 from onmt.utils.logging import init_logger, logger
+from onmt.utils import schedules
 
 
 def _check_save_model_path(opt):
@@ -122,6 +123,8 @@ def main(opt):
     trainer = build_trainer(
         opt, model, fields, optim, data_type, model_saver=model_saver)
 
+    batch_schedule = schedules.globals()[opts.batch_schedule] if opts.batch_schedule else None
+
     def train_iter_fct(): return build_dataset_iter(
         lazily_load_dataset("train", opt), fields, opt)
 
@@ -130,7 +133,7 @@ def main(opt):
 
     # Do training.
     trainer.train(train_iter_fct, valid_iter_fct, opt.train_steps,
-                  opt.valid_steps)
+                  opt.valid_steps, batch_schedule)
 
     if opt.tensorboard:
         trainer.report_manager.tensorboard_writer.close()
