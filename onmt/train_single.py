@@ -123,7 +123,7 @@ def main(opt):
     trainer = build_trainer(
         opt, model, fields, optim, data_type, model_saver=model_saver)
 
-    batch_schedule = schedules.globals()[opts.batch_schedule] if opts.batch_schedule else None
+    batch_schedule = getattr(schedules, opt.batch_schedule) if opt.batch_schedule else None
 
     def train_iter_fct(): return build_dataset_iter(
         lazily_load_dataset("train", opt), fields, opt)

@@ -137,10 +137,11 @@ class Trainer(object):
         report_stats = onmt.utils.Statistics()
         self._start_report_manager(start_time=total_stats.start_time)
 
-        epoch = 0
-        while step <= train_steps:
-
+        train_epochs = train_steps // len(train_iter)
+        for epoch in range(train_epochs):
             reduce_counter = 0
+            if batch_schedule:
+                self.grad_accum_count
             for i, batch in enumerate(train_iter):
                 if batch_schedule:
                     self.grad_accum_count = batch_schedule(epoch)
@@ -151,7 +152,6 @@ class Trainer(object):
                                     % (self.gpu_rank, i, accum))
 
                     true_batchs.append(batch)
-
                     if self.norm_method == "tokens":
                         num_tokens = batch.tgt[1:].ne(
                             self.train_loss.padding_idx).sum()
@@ -159,6 +159,7 @@ class Trainer(object):
                     else:
                         normalization += batch.batch_size
                     accum += 1
+                    step += 1
                     if accum == self.grad_accum_count:
                         reduce_counter += 1
                         if self.gpu_verbose_level > 0:
@@ -201,13 +202,10 @@ class Trainer(object):
 
                         if self.gpu_rank == 0:
                             self._maybe_save(step)
-                        step += 1
-                        if step > train_steps:
-                            break
+                        
             if self.gpu_verbose_level > 0:
                 logger.info('GpuRank %d: we completed an epoch \
                             at step %d' % (self.gpu_rank, step))
-            epoch += 1
             train_iter = train_iter_fct()
 
         return total_stats
